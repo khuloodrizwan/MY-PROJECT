@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="payment.css">
+</head>
+<body >
+    <nav >
+        <ul class="sidebar">
+            <li onclick=hidesidebar()>  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="navy"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>  </li>
+            <li> <a href="about.html"> About Us </a> </li>
+            <li> <a href="signin.html">  Student Sign-Up </a> </li>
+            <li> <a href="login.html">  Student Login </a> </li>
+            <li> <a href="#"> College Registration </a> </li>
+            <li> <a href="#"> College Admin </a> </li>
+            <li> <a href="#"> Admin </a> </li>
+            <li> <a href="contact.html"> Contact </a> </li>
+            
+
+        </ul>
+    </nav>
+    <nav>
+        <ul>
+            <li> PAY CAMPUS </li>
+            <li onclick=showsidebar()>  <svg xmlns="http://www.w3.org/2000/svg" height="26px" viewBox="0 -960 960 960" width="26px" fill="navy"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>  </li>
+
+        </ul>
+    </nav>
+    
+    
+    <main>
+           <div class="student-details">
+                <h3>Student Details</h3>
+                <p><strong>Name:</strong> Khulood Rizwan Chivilkar</p>
+                <p><strong>Address:</strong> Pune</p>
+                <p><strong>Class:</strong> SY</p>
+                <p><strong>Course:</strong> BBA(CA)</p>
+                <p><strong>Email:</strong> chivilkarkhulood@gmail.com</p>
+                <p><strong>Contact:</strong> 3344226677</p>
+            </div>
+    
+        
+        
+        <section class="payment-status">
+   
+            <h3>Current Payment Status</h3>
+            <p>Total Fees:<strong> 40000</strong></p>
+            <p>Total Due: <strong>30000</strong></p>
+            
+            <div class="dropdown">
+                <button class="btn">Make Payment ▼</button>
+                <div class="dropdown-content">
+                    <a href="#">Credit Card</a>
+                    <a href="#">Debit Card</a>
+                    <a href="#">Net Banking</a>
+                    <a href="#">UPI</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="upcoming-payments">
+            <h3>Upcoming Payments</h3>
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                </tr>
+                <tr>
+                    <td>May 10, 2025</td>
+                    <td>10000</td>
+                </tr>
+            </table>
+        </section>
+
+        <section class="payment-history">
+            <h3>Payment History</h3>
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+                <tr>
+                    <td>March 10, 2025</td>
+                    <td>10000</td>
+                    <td>Paid</td>
+                </tr>
+            </table>
+        </section>
+
+        
+    </main>
+
+    <footer>
+        <h3>Need Help? <a href="contact.html"> Contact Us</a></h3>
+    
+        <p>&copy; 2025 Pay Campus. All rights reserved.</p>
+    </footer>
+    <script>
+        function showbutton() {
+            const sidebar = document.querySelector('.option')
+            sidebar.style.display = 'flex'
+        }
+        function hidebutton() {
+            const sidebar = document.querySelector('.option')
+            sidebar.style.display = 'none'
+        }  
+    </script> 
+
+</body>
+</html>

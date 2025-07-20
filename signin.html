@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="stylesheet" href="signin.css">
+     
+    
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+   <title> Registration Form </title>
+</head>
+<body>
+    <div class="container">
+        <header>Registration</header>
+        <form action="signin.php" method="post">
+            <div class="form first">
+                <div class="details personal">
+                    <span class="title">Personal Details</span>
+                    <div class="fields">
+                        <div class="input-field">
+                            <label>Full Name</label>
+                            <input type="text" name="fullname" placeholder="Enter your name" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Date of Birth</label>
+                            <input type="date" name="dob" placeholder="Enter birth date" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Email</label>
+                            <input type="text" name="email" placeholder="Enter your email" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Mobile Number</label>
+                            <input type="number" name="mobilenumber" placeholder="Enter mobile number" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Gender</label>
+                            <select required name="gender">
+                                <option disabled selected>Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option>Others</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label>Mother's name</label>
+                            <input type="text" name="mothername" placeholder="Enter your mother's name" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="details ID">
+                    <span class="title">College Details</span>
+                    <div class="fields">
+                        <div class="input-field">
+                            <label>College Name</label>
+                            <select required name="collegename">
+                                <option disabled selected>Select College</option>
+                                <option value="arihant">Arihant College of Arts Commerce and Science</option>
+                                <option value="poona">AKI Poona College</option>
+                                <option value="allana">Allana institution</option>
+                            </select>
+                
+                        </div>
+                        <div class="input-field">
+                        
+                            <label>Course Name</label>
+                            <select required name="Coursename">
+                                <option disabled selected>Select Course</option>
+                                <option value="bba(ca)">BBA (CA)</option>
+                                <option value="bcs">BCS</option>
+                                <option value="bba">BBA</option>
+                                <option value="bca">BCA</option>
+                                <option value="mba">MBA</option>
+                                <option value="ba">BA</option>
+                                <option value="bba(ib)">BBA (IB)</option>
+                                <option value="mca">MCA</option>
+                                <option value="mcs">MCS</option>
+                           </select>
+                        </div>
+                        <div class="input-field">
+                            <label>Current Year</label>
+                            <select required name="Currentyear">
+                                <option disabled selected>Select Year</option>
+                                <option value="fy">First Year</option>
+                                <option value="sy">Second Year</option>
+                                <option value="ty">Third Year</option> 
+                               
+                           </select>
+                        </div>
+                        <div class="input-field">
+                            <label>Academic Year</label>
+                            <input type="text"name="Academicyear" placeholder="YYYY-YYYY" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Student ID</label>
+                            <input type="text" name="studentid" placeholder="Enter your student ID" pattern="\d{4}-\d{4}" required>
+                        </div>
+                        <div class="input-field">
+                            <label>College ID</label>
+                            <input type="text" name="cllgid" placeholder="Enter your college ID" required>
+                        </div>
+                    </div>
+                    <button class="nextBtn">
+                        <span class="btnText">Next</span>
+                        <i class="uil uil-navigator"></i>
+                    </button>
+                </div> 
+            </div>
+            <div class="form second">
+                <div class="details address">
+                    <span class="title">Address Details</span>
+                    <div class="fields">
+                        <div class="input-field">
+                            <label>Address Type</label>
+                            <input type="text" name="addresstype" placeholder="Permanent or Temporary" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Nationality</label>
+                            <input type="text" name="nationality" placeholder="Enter nationality" required>
+                        </div>
+                        <div class="input-field">
+                            <label>State</label>
+                            <input type="text" name="state" placeholder="Enter your state" required>
+                        </div>
+                        <div class="input-field">
+                            <label>District</label>
+                            <input type="text" name="district" placeholder="Enter your district" required>
+                        </div>
+                        <div class="input-field">
+                            <label>PIN Number</label>
+                            <input type="text" name="pincode" placeholder="Enter PIN number" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Nearest Landmark</label>
+                            <input type="text" name="landmark" placeholder="Enter nearest landmark" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="details family">
+                    <span class="title">Accounts and Login Details</span>
+                    <div class="fields">
+                        <div class="input-field">
+                            <label>Username</label>
+                            <input type="text" name="username" placeholder="Enter your username" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Password</label>
+                            <input type="text" name="password" placeholder="Enter your password name" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Confirm Password</label>
+                            <input type="text" name="Confirmpassword" placeholder="Confirm password" required>
+                        </div>
+                        <div class="input-field">
+                            <label>Bank Name</label>
+                            <select required name="bankname">
+                                <option disabled selected>Select bank</option>
+                                <option value="sbi">SBI</option>
+                                <option value="boi">BOI</option>
+                                <option value="kotal">Kotak</option>
+                                <option value="hdfc">HDFC</option>
+                                <option value="axis">Axis</option>
+                           </select>
+                        </div>
+                        <div class="input-field">
+                            <label>Payment Type</label>
+                            <select required name="paymenttype">
+                                <option disabled selected>Select type</option>
+                                <option value="emi">EMI</option>
+                                <option value="direct">Direct Transaction</option>
+                                <option value="Scolarship">Scolarship Based</option>
+                            </select>
+                        </div>
+                        <div class="input-field">
+                            <label>Account Creation Date</label>
+                            <input type="date" name="Creationdate" placeholder="Enter date" required>
+                        </div>
+                    </div>
+                    <div class="buttons">
+                        <div class="backBtn">
+                            <i class="uil uil-navigator"></i>
+                            <span class="btnText">Back</span>
+                        </div>
+                        
+                        <button class="sumbit" type="submit">
+                            <span class="btnText">Submit</span>
+                            <i class="uil uil-navigator"></i>
+                        </button>
+                    </div>
+                </div> 
+            </div>
+        </form>
+    </div>
+    <script src="signin.js"></script>
+</body>
+</html>
