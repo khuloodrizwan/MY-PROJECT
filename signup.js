@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
     const courseSelect = document.querySelector('select[name="coursename"]');
     const totalFeesInput = document.getElementById("total_fees");

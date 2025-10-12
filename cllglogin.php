@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION["admin_name"] = $row["admin_name"];
 
             // Redirect to admin page
-            header("Location: admin.html");
+            header("Location: admin.php");
             exit();
         } else {
             echo "<p style='color:red;'>Invalid email or password.</p>";

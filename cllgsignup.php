@@ -1,12 +1,13 @@
 <?php
+// Start session (optional)
 session_start();
 
+// Database connection
 $servername = "localhost";
-$username = "root"; // XAMPP username
-$password = ""; // XAMPP password
-$dbname = "form"; // Database name
+$username = "root";
+$password = "";
+$dbname = "form";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
@@ -14,37 +15,43 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST["email"];
-    $password_input = $_POST["password"];
+    // Collect and trim form data
+    $college_name = trim($_POST["college_name"]);
+    $admin_name = trim($_POST["admin_name"]);
+    $email = trim($_POST["email"]);
+    $phone = trim($_POST["phone"]);
+    $password_input = trim($_POST["password"]);
 
-    // Fetch college admin data from cllgsignup table
-    $sql = "SELECT * FROM cllgsignup WHERE email = ?";
-    $stmt = $conn->prepare($sql);
+    // Check if email already exists
+    $stmt = $conn->prepare("SELECT * FROM cllgsignup WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Check if email exists
     if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-
-        // Plain text password check
-        if ($password_input === $row["password"]) {
-            // Store session variables
-            $_SESSION["email"] = $email;
-            $_SESSION["college_name"] = $row["college_name"];
-            $_SESSION["admin_name"] = $row["admin_name"];
-
-            // Redirect to home or dashboard
-            header("Location: home.html");
-            exit();
-        } else {
-            echo "Invalid email or password.";
-        }
-    } else {
-        echo "Email not found.";
+        // Email already registered
+        echo "This email is already registered!";
+        exit();
     }
+    $stmt->close();
+
+    // Insert new college into database
+    $stmt = $conn->prepare("INSERT INTO cllgsignup (college_name, admin_name, email, phone, password) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssss", $college_name, $admin_name, $email, $phone, $password_input);
+
+    if ($stmt->execute()) {
+        // Success: Redirect to home.html
+        $stmt->close();
+        $conn->close();
+        header("Location: home.html");
+        exit();
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    $stmt->close();
 }
 
 $conn->close();
