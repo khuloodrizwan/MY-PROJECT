@@ -1,9 +1,10 @@
 <?php
 session_start();
+
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "paycampus";
+$username = "root"; // XAMPP username
+$password = ""; // XAMPP password
+$dbname = "form"; // Database name
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -13,31 +14,32 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Check if form submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST["username"];
-    $password = $_POST["password"];
+    $email = $_POST["email"];
+    $password_input = $_POST["password"];
 
-    // Fetch user data from database
-    $sql = "SELECT * FROM users WHERE username = ?";
+    // Fetch student data from signup table
+    $sql = "SELECT * FROM signup WHERE email = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $username);
+    $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Check if user exists
+    // Check if email exists
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        
-        // Verify password
-        if (password_verify($password, $row["password"])) {
-            $_SESSION["username"] = $username; // Store session
-            header("Location: payment.html"); // Redirect to payment page
+
+        // Compare plain text password
+        if ($password_input === $row["password"]) {
+            $_SESSION["email"] = $email; // Create session
+            header("Location: payment.html"); // Redirect after successful login
             exit();
         } else {
-            echo "Invalid username or password.";
+            echo "Invalid email or password.";
         }
     } else {
-        echo "User not found.";
+        echo "Email not found.";
     }
 }
 

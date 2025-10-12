@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root"; // Default MySQL username
 $password = ""; // Default MySQL password (empty in XAMPP)
-$dbname = "paycampus"; // Your database name
+$dbname = "form"; // Database name
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -13,46 +13,34 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $full_name = $_POST["fullname"];
+    // Collect form data from HTML
+    $fullname = $_POST["fullname"];
+    $city = $_POST["city"];
     $email = $_POST["email"];
-    $mobile_number = $_POST["mobilenumber"];
-    $dob = date("Y-m-d", strtotime($_POST["dob"]));
-
-
+    $number = $_POST["number"]; // matches HTML name
     $gender = $_POST["gender"];
-    $mother_name = $_POST["mothername"];
-    $college_name = $_POST["collegename"];
-    $course_name = $_POST["Coursename"];
-    $current_year = $_POST["Currentyear"];
-    $academic_year = $_POST["Academicyear"];
-    $student_id = $_POST["studentid"];
-    $college_id = $_POST["cllgid"];
-    $address_type = $_POST["addresstype"];
-    $district = $_POST["district"];
-    $pin_number = $_POST["pin_number"];
-    $nationality = $_POST["nationality"];
-    $state = $_POST["state"];
-    $nearest_landmark = $_POST["landmark"];
-    $username = $_POST["username"];
-    $password = $_POST["password"];
-    $confirm_password = $_POST["confirmpassword"];
-    $bank_name = $_POST["bankname"];
-    $payment_type = $_POST["paymenttype"];
-    $account_creation_date = date("Y-m-d", strtotime($_POST["Creationdate"]));
+    $mothername = $_POST["mothername"];
+    $collegename = $_POST["collegename"];
+    $coursename = $_POST["coursename"];
+    $currentyear = $_POST["currentyear"];
+    $academicyear = $_POST["academicyear"];
+    $username_input = $_POST["username"];
+    $password_input = $_POST["password"];
 
-    // Check if passwords match
-    if ($password !== $confirm_password) {
-        die("Error: Passwords do not match!");
-    }
+    // Set default values for total_fees and due_fees
+    $total_fees = 0;
+    $due_fees = 0;
 
-    // Hash the password before storing
-    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+    // Insert into database
+    $sql = "INSERT INTO signup 
+            (fullname, city, email, number, gender, mothername, collegename, coursename, total_fees, due_fees, currentyear, academicyear, username, password) 
+            VALUES 
+            ('$fullname', '$city', '$email', '$number', '$gender', '$mothername', '$collegename', '$coursename', '$total_fees', '$due_fees', '$currentyear', '$academicyear', '$username_input', '$password_input')";
 
-    $sql = "INSERT INTO users (full_name, email, mobile_number, dob, gender, mother_name, college_name, course_name, current_year, academic_year, student_id, college_id, address_type, district, pin_number, nationality, state, nearest_landmark, username, password, bank_name, payment_type, account_creation_date) 
-            VALUES ('$full_name', '$email', '$mobile_number', '$dob', '$gender', '$mother_name', '$college_name', '$course_name', '$current_year', '$academic_year', '$student_id', '$college_id', '$address_type', '$district', '$pin_number', '$nationality', '$state', '$nearest_landmark', '$username', '$hashed_password', '$bank_name', '$payment_type', '$account_creation_date')";
-
-    if ($conn->query($sql) === TRUE) {
-        echo "Registration successful!";
+   if ($conn->query($sql) === TRUE) {
+        // Redirect to home.html after successful registration
+        header("Location: home.html");
+        exit(); // Always use exit() after header redirect
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }
