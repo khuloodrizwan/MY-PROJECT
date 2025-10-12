@@ -5,14 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <link rel="stylesheet" href="signin.css">
+    <link rel="stylesheet" href="signup.css">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
     <title>Registration Form</title>
 </head>
 <body>
     <div class="container">
         <header>Registration</header>
-        <form action="signin.php" method="post" autocomplete="off">
+        <form action="signup.php" method="post" autocomplete="off">
             <div class="fields">
                 <div class="input-field">
                     <label>Full Name</label>
@@ -89,12 +89,19 @@
                     <label>Password</label>
                     <input type="password" name="password" placeholder="Enter your password" required>
                 </div>
+
+                <!-- Hidden fields for fees -->
+                <input type="hidden" name="total_fees" id="total_fees">
+                <input type="hidden" name="due_fees" id="due_fees">
             </div>
+
             <button class="submit" type="submit">
                 <span class="btnText">Submit</span>
                 <i class="uil uil-navigator"></i>
             </button>
         </form>
     </div>
+
+    <script src="signup.js"></script>
 </body>
 </html>
