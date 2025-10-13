@@ -34,23 +34,35 @@ $admin_name = $_SESSION['admin_name'];
 
 // Get college ID (c_id) from cllgsignup table
 $stmt = $conn->prepare("SELECT c_id FROM cllgsignup WHERE email = ?");
+if (!$stmt) {
+    die("Error preparing statement: " . $conn->error);
+}
 $stmt->bind_param("s", $college_email);
 $stmt->execute();
 $result = $stmt->get_result();
 $college_data = $result->fetch_assoc();
+
+// Check if college exists
+if (!$college_data) {
+    die("College not found in database. Please contact administrator.");
+}
+
 $c_id = $college_data['c_id'];
 $stmt->close();
 
 // Fetch all students for this college
 $sql = "SELECT 
-            id, fullname, mothername, city, email, number, gender, 
+            s_id, fullname, mothername, city, email, number, gender, 
             collegename, coursename, total_fees, due_fees, 
             currentyear, academicyear, username
         FROM signup 
         WHERE c_id = ?
-        ORDER BY id DESC";
+        ORDER BY s_id DESC";
 
 $stmt = $conn->prepare($sql);
+if (!$stmt) {
+    die("Error preparing statement: " . $conn->error);
+}
 $stmt->bind_param("i", $c_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -62,32 +74,40 @@ $stmt->close();
 
 // Get unique courses for filter
 $stmt = $conn->prepare("SELECT DISTINCT coursename FROM signup WHERE c_id = ? ORDER BY coursename");
-$stmt->bind_param("i", $c_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$courses = [];
-while ($row = $result->fetch_assoc()) {
-    $courses[] = $row['coursename'];
+if ($stmt) {
+    $stmt->bind_param("i", $c_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $courses = [];
+    while ($row = $result->fetch_assoc()) {
+        $courses[] = $row['coursename'];
+    }
+    $stmt->close();
+} else {
+    $courses = [];
 }
-$stmt->close();
 
 // Get unique academic years for filter
 $stmt = $conn->prepare("SELECT DISTINCT academicyear FROM signup WHERE c_id = ? ORDER BY academicyear DESC");
-$stmt->bind_param("i", $c_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$academic_years = [];
-while ($row = $result->fetch_assoc()) {
-    $academic_years[] = $row['academicyear'];
+if ($stmt) {
+    $stmt->bind_param("i", $c_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $academic_years = [];
+    while ($row = $result->fetch_assoc()) {
+        $academic_years[] = $row['academicyear'];
+    }
+    $stmt->close();
+} else {
+    $academic_years = [];
 }
-$stmt->close();
 
 // Handle delete request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     $student_id = $_POST['student_id'];
     
     // Delete student (ensure they belong to this college)
-    $stmt = $conn->prepare("DELETE FROM signup WHERE id = ? AND c_id = ?");
+    $stmt = $conn->prepare("DELETE FROM signup WHERE s_id = ? AND c_id = ?");
     $stmt->bind_param("ii", $student_id, $c_id);
     
     if ($stmt->execute()) {
@@ -275,7 +295,7 @@ $conn->close();
                             $status_class = $status === 'paid' ? 'status-paid' : 'status-pending';
                             $status_text = $status === 'paid' ? 'Paid' : 'Pending';
                         ?>
-                        <tr data-id="<?php echo $student['id']; ?>" 
+                        <tr data-id="<?php echo $student['s_id']; ?>" 
                             data-fullname="<?php echo htmlspecialchars($student['fullname']); ?>"
                             data-email="<?php echo htmlspecialchars($student['email']); ?>"
                             data-course="<?php echo htmlspecialchars($student['coursename']); ?>"
@@ -283,7 +303,7 @@ $conn->close();
                             data-status="<?php echo $status; ?>"
                             data-total-fees="<?php echo $student['total_fees']; ?>"
                             data-due-fees="<?php echo $student['due_fees']; ?>">
-                            <td><?php echo $student['id']; ?></td>
+                            <td><?php echo $student['s_id']; ?></td>
                             <td><?php echo htmlspecialchars($student['fullname']); ?></td>
                             <td><?php echo htmlspecialchars($student['mothername']); ?></td>
                             <td><?php echo htmlspecialchars($student['city']); ?></td>
@@ -298,10 +318,10 @@ $conn->close();
                             <td><?php echo htmlspecialchars($student['academicyear']); ?></td>
                             <td>
                                 <div class="action-buttons">
-                                    <a href="edit_student.php?id=<?php echo $student['id']; ?>" class="btn-action btn-edit" title="Edit">
+                                    <a href="edit_student.php?id=<?php echo $student['s_id']; ?>" class="btn-action btn-edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button onclick="deleteStudent(<?php echo $student['id']; ?>, '<?php echo htmlspecialchars($student['fullname']); ?>')" 
+                                    <button onclick="deleteStudent(<?php echo $student['s_id']; ?>, '<?php echo htmlspecialchars($student['fullname']); ?>')" 
                                             class="btn-action btn-delete" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -328,7 +348,7 @@ $conn->close();
                         (($student['total_fees'] - $student['due_fees']) / $student['total_fees']) * 100 : 0;
                 ?>
                 <div class="student-card" 
-                     data-id="<?php echo $student['id']; ?>"
+                     data-id="<?php echo $student['s_id']; ?>"
                      data-fullname="<?php echo htmlspecialchars($student['fullname']); ?>"
                      data-email="<?php echo htmlspecialchars($student['email']); ?>"
                      data-course="<?php echo htmlspecialchars($student['coursename']); ?>"
@@ -342,7 +362,7 @@ $conn->close();
                         </div>
                         <div class="student-info">
                             <h3><?php echo htmlspecialchars($student['fullname']); ?></h3>
-                            <p class="student-id">ID: <?php echo $student['id']; ?> | <?php echo strtoupper(htmlspecialchars($student['currentyear'])); ?></p>
+                            <p class="student-id">ID: <?php echo $student['s_id']; ?> | <?php echo strtoupper(htmlspecialchars($student['currentyear'])); ?></p>
                         </div>
                         <span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span>
                     </div>
@@ -388,10 +408,10 @@ $conn->close();
                     </div>
                     
                     <div class="card-footer">
-                        <a href="edit_student.php?id=<?php echo $student['id']; ?>" class="btn-card btn-edit">
+                        <a href="edit_student.php?id=<?php echo $student['s_id']; ?>" class="btn-card btn-edit">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <button onclick="deleteStudent(<?php echo $student['id']; ?>, '<?php echo htmlspecialchars($student['fullname']); ?>')" 
+                        <button onclick="deleteStudent(<?php echo $student['s_id']; ?>, '<?php echo htmlspecialchars($student['fullname']); ?>')" 
                                 class="btn-card btn-delete">
                             <i class="fas fa-trash"></i> Delete
                         </button>

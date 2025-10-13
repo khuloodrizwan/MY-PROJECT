@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         fullname = ?, mothername = ?, city = ?, email = ?, number = ?, 
         gender = ?, coursename = ?, currentyear = ?, academicyear = ?, 
         total_fees = ?, due_fees = ?
-        WHERE id = ? AND c_id = ?");
+        WHERE s_id = ? AND c_id = ?");
     
     $stmt->bind_param("sssssssssddii", 
         $fullname, $mothername, $city, $email, $number, 
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch student data
-$stmt = $conn->prepare("SELECT * FROM signup WHERE id = ? AND c_id = ?");
+$stmt = $conn->prepare("SELECT * FROM signup WHERE s_id = ? AND c_id = ?");
 $stmt->bind_param("ii", $student_id, $c_id);
 $stmt->execute();
 $result = $stmt->get_result();
