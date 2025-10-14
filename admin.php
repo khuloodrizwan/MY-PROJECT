@@ -1,7 +1,7 @@
 <?php
 /**
- * PayCampus Admin Dashboard
- * College administrators can view and manage their students
+ * PayCampus Admin Dashboard (Enhanced with Payment Information)
+ * College administrators can view and manage their students with payment details
  */
 
 // Start session and check authentication
@@ -50,14 +50,19 @@ if (!$college_data) {
 $c_id = $college_data['c_id'];
 $stmt->close();
 
-// Fetch all students for this college
+// Fetch all students for this college with payment info
 $sql = "SELECT 
-            s_id, fullname, mothername, city, email, number, gender, 
-            collegename, coursename, total_fees, due_fees, 
-            currentyear, academicyear, username
-        FROM signup 
-        WHERE c_id = ?
-        ORDER BY s_id DESC";
+            s.s_id, s.fullname, s.mothername, s.city, s.email, s.number, s.gender, 
+            s.collegename, s.coursename, s.total_fees, s.due_fees, 
+            s.currentyear, s.academicyear, s.username,
+            COUNT(p.p_id) as payment_count,
+            MAX(p.payment_date) as last_payment_date,
+            MAX(p.installment_no) as last_installment
+        FROM signup s
+        LEFT JOIN payments p ON s.s_id = p.s_id AND p.status = 'Paid'
+        WHERE s.c_id = ?
+        GROUP BY s.s_id
+        ORDER BY s.s_id DESC";
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -106,19 +111,29 @@ if ($stmt) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     $student_id = $_POST['student_id'];
     
-    // Delete student (ensure they belong to this college)
-    $stmt = $conn->prepare("DELETE FROM signup WHERE s_id = ? AND c_id = ?");
-    $stmt->bind_param("ii", $student_id, $c_id);
+    // Start transaction
+    $conn->begin_transaction();
     
-    if ($stmt->execute()) {
+    try {
+        // Delete payments first (foreign key)
+        $stmt = $conn->prepare("DELETE FROM payments WHERE s_id = ?");
+        $stmt->bind_param("i", $student_id);
+        $stmt->execute();
         $stmt->close();
-        $conn->close();
+        
+        // Delete student (ensure they belong to this college)
+        $stmt = $conn->prepare("DELETE FROM signup WHERE s_id = ? AND c_id = ?");
+        $stmt->bind_param("ii", $student_id, $c_id);
+        $stmt->execute();
+        $stmt->close();
+        
+        $conn->commit();
         header('Location: admin.php?deleted=success');
         exit();
-    } else {
-        $error_message = "Error deleting student.";
+    } catch (Exception $e) {
+        $conn->rollback();
+        $error_message = "Error deleting student: " . $e->getMessage();
     }
-    $stmt->close();
 }
 
 // Handle logout
@@ -275,17 +290,15 @@ $conn->close();
                         <tr>
                             <th>ID</th>
                             <th data-sort="fullname">Full Name <i class="fas fa-sort"></i></th>
-                            <th>Mother Name</th>
-                            <th>City</th>
                             <th>Email</th>
                             <th>Phone</th>
-                            <th>Gender</th>
                             <th data-sort="coursename">Course <i class="fas fa-sort"></i></th>
                             <th>Current Year</th>
                             <th data-sort="total_fees">Total Fees <i class="fas fa-sort"></i></th>
                             <th data-sort="due_fees">Due Fees <i class="fas fa-sort"></i></th>
                             <th data-sort="status">Status <i class="fas fa-sort"></i></th>
-                            <th>Academic Year</th>
+                            <th>Payments</th>
+                            <th>Last Payment</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -294,6 +307,10 @@ $conn->close();
                             $status = $student['due_fees'] == 0 ? 'paid' : 'pending';
                             $status_class = $status === 'paid' ? 'status-paid' : 'status-pending';
                             $status_text = $status === 'paid' ? 'Paid' : 'Pending';
+                            $last_payment_info = '';
+                            if ($student['last_payment_date']) {
+                                $last_payment_info = date('d M Y', strtotime($student['last_payment_date']));
+                            }
                         ?>
                         <tr data-id="<?php echo $student['s_id']; ?>" 
                             data-fullname="<?php echo htmlspecialchars($student['fullname']); ?>"
@@ -305,21 +322,35 @@ $conn->close();
                             data-due-fees="<?php echo $student['due_fees']; ?>">
                             <td><?php echo $student['s_id']; ?></td>
                             <td><?php echo htmlspecialchars($student['fullname']); ?></td>
-                            <td><?php echo htmlspecialchars($student['mothername']); ?></td>
-                            <td><?php echo htmlspecialchars($student['city']); ?></td>
                             <td><?php echo htmlspecialchars($student['email']); ?></td>
                             <td><?php echo htmlspecialchars($student['number']); ?></td>
-                            <td><?php echo ucfirst(htmlspecialchars($student['gender'])); ?></td>
                             <td><?php echo strtoupper(htmlspecialchars($student['coursename'])); ?></td>
                             <td><?php echo strtoupper(htmlspecialchars($student['currentyear'])); ?></td>
                             <td>₹<?php echo number_format($student['total_fees']); ?></td>
                             <td>₹<?php echo number_format($student['due_fees']); ?></td>
                             <td><span class="status-badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span></td>
-                            <td><?php echo htmlspecialchars($student['academicyear']); ?></td>
+                            <td>
+                                <span class="payment-count" title="<?php echo $student['payment_count']; ?> payment(s) made">
+                                    <i class="fas fa-receipt"></i> <?php echo $student['payment_count']; ?>
+                                    <?php if ($student['last_installment']): ?>
+                                        <small>(Last: #<?php echo $student['last_installment']; ?>)</small>
+                                    <?php endif; ?>
+                                </span>
+                            </td>
+                            <td>
+                                <?php if ($last_payment_info): ?>
+                                    <span class="last-payment"><?php echo $last_payment_info; ?></span>
+                                <?php else: ?>
+                                    <span class="no-payment">No payments</span>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <div class="action-buttons">
                                     <a href="edit_student.php?id=<?php echo $student['s_id']; ?>" class="btn-action btn-edit" title="Edit">
                                         <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="student_payment_history.php?id=<?php echo $student['s_id']; ?>" class="btn-action btn-history" title="Payment History">
+                                        <i class="fas fa-history"></i>
                                     </a>
                                     <button onclick="deleteStudent(<?php echo $student['s_id']; ?>, '<?php echo htmlspecialchars($student['fullname']); ?>')" 
                                             class="btn-action btn-delete" title="Delete">
@@ -346,6 +377,10 @@ $conn->close();
                     $status_text = $status === 'paid' ? 'Paid' : 'Pending';
                     $progress = $student['total_fees'] > 0 ? 
                         (($student['total_fees'] - $student['due_fees']) / $student['total_fees']) * 100 : 0;
+                    $last_payment_info = '';
+                    if ($student['last_payment_date']) {
+                        $last_payment_info = date('d M Y', strtotime($student['last_payment_date']));
+                    }
                 ?>
                 <div class="student-card" 
                      data-id="<?php echo $student['s_id']; ?>"
@@ -389,6 +424,28 @@ $conn->close();
                             <span><?php echo htmlspecialchars($student['city']); ?></span>
                         </div>
                         
+                        <!-- Payment Info -->
+                        <div class="payment-info-card">
+                            <div class="payment-summary">
+                                <div class="payment-stat">
+                                    <i class="fas fa-receipt"></i>
+                                    <div>
+                                        <strong><?php echo $student['payment_count']; ?></strong>
+                                        <span>Payments</span>
+                                    </div>
+                                </div>
+                                <?php if ($last_payment_info): ?>
+                                <div class="payment-stat">
+                                    <i class="fas fa-clock"></i>
+                                    <div>
+                                        <strong><?php echo $last_payment_info; ?></strong>
+                                        <span>Last Payment</span>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
                         <div class="fee-details">
                             <div class="fee-row">
                                 <span>Total Fees:</span>
@@ -410,6 +467,9 @@ $conn->close();
                     <div class="card-footer">
                         <a href="edit_student.php?id=<?php echo $student['s_id']; ?>" class="btn-card btn-edit">
                             <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="student_payment_history.php?id=<?php echo $student['s_id']; ?>" class="btn-card btn-history">
+                            <i class="fas fa-history"></i> History
                         </a>
                         <button onclick="deleteStudent(<?php echo $student['s_id']; ?>, '<?php echo htmlspecialchars($student['fullname']); ?>')" 
                                 class="btn-card btn-delete">
@@ -437,7 +497,7 @@ $conn->close();
             <div class="modal-body">
                 <i class="fas fa-exclamation-triangle warning-icon"></i>
                 <p>Are you sure you want to delete <strong id="studentNameModal"></strong>?</p>
-                <p class="warning-text">This action cannot be undone.</p>
+                <p class="warning-text">This action will delete the student and all associated payment records. This cannot be undone.</p>
             </div>
             <div class="modal-footer">
                 <button class="btn-cancel" id="cancelDelete">Cancel</button>
